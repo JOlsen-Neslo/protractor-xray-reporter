@@ -111,11 +111,6 @@ mime-types@^2.1.12:
   dependencies:
     mime-db "1.49.0"
 
-popsicle-basic-auth@^1.0.0:
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/popsicle-basic-auth/-/popsicle-basic-auth-1.0.0.tgz#6e737637dd7a7dc6e3ba04e583f970ac2478efef"
-  integrity sha1-bnN2N916fcbjugTlg/lwrCR47+8=
-
 popsicle@^10.0.1:
   version "10.0.1"
   resolved "https://registry.yarnpkg.com/popsicle/-/popsicle-10.0.1.tgz#2abd36130560647c74eaf08400d473ae25c4486f"

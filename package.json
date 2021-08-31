@@ -1,7 +1,7 @@
 {
-  "name": "protractor-xray-reporter",
-  "version": "1.0.6",
-  "description": "Xray reporter for Jasmin and Protractor",
+  "name": "protractor-xray-v2-reporter",
+  "version": "1.0.0",
+  "description": "Xray v2 Cloud REST API reporter for Jasmine and Protractor",
   "main": "xray-reporter.js",
   "keywords": [
     "jasmine",
@@ -15,15 +15,11 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/lukas-reineke/protractor-xray-reporter"
+    "url": "https://github.com/JOlsen-Neslo/protractor-xray-reporter"
   },
-  "author": "Lukas Reineke <lukas.reineke@protonmail.com>",
-  "contributors": [
-    "Dimitri Rybak <kontakt@dimitri-rybak.de>"
-  ],
+  "author": "Jordan Olsen <jolsen@neslotech.co.za>",
   "license": "MIT",
   "dependencies": {
-    "popsicle": "^10.0.1",
-    "popsicle-basic-auth": "^1.0.0"
+    "popsicle": "^10.0.1"
   }
 }
