@@ -1,6 +1,6 @@
 {
   "name": "protractor-xray-v2-reporter",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Xray v2 Cloud REST API reporter for Jasmine and Protractor",
   "main": "xray-reporter.js",
   "keywords": [
