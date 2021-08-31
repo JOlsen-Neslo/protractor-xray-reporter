@@ -54,8 +54,8 @@ exports.config = {
             'jiraProjectKey': 'DEMO',
             'jiraClientId': 'XXX',
             'jiraClientSecret': 'XXX',
-            'xrayAuthUrl': 'https://{jira-server}.atlassian.net/api/v2/authenticate',
-            'xrayImportUrl': 'https://{jira-server}.atlassian.net/api/v2/import/execution'
+            'xrayAuthUrl': 'https://xray.cloud.xpand-it.com/api/v2/authenticate',
+            'xrayImportUrl': 'https://xray.cloud.xpand-it.com/api/v2/import/execution'
         };
 
         // add the reporter
@@ -97,6 +97,8 @@ create versions.
 * `xrayImportUrl` (required) - URL to import your test executions
 
 # Test Setup
+
+You need to ensure that all test cases are created as `Generic` test cases, not `Manual` test cases.
 
 A test case is represented by a `describe` block. The test set ID has to be added at the end of the description with an @
 symbol.
