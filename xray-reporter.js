@@ -6,29 +6,30 @@ const getDate = () => {
     let tz = (utc - date.getTime()) / (60 * 60 * 1000);
 
     switch (true) {
-    case (tz === 0):
-        tz = '+00:00';
-        break;
-    case (tz < 9 && tz > 0):
-        tz = '+0' + tz + ':00';
-        break;
-    case (tz > -9 && tz < 0):
-        tz = '-0' + Math.abs(tz) + ':00';
-        break;
-    case (tz > 9):
-        tz = '+' + tz + ':00';
-        break;
-    default:
-        tz = tz + ':00';
-        break;
+        case (tz === 0):
+            tz = '+00:00';
+            break;
+        case (tz < 9 && tz > 0):
+            tz = '+0' + tz + ':00';
+            break;
+        case (tz > -9 && tz < 0):
+            tz = '-0' + Math.abs(tz) + ':00';
+            break;
+        case (tz > 9):
+            tz = '+' + tz + ':00';
+            break;
+        default:
+            tz = tz + ':00';
+            break;
     }
 
     return date.toISOString().split('.')[0] + tz;
 };
 
+// TODO: refactor this logic, can be heavily simplified
 const XrayReporter = (options, onPrepareDefer, onCompleteDefer, browser) => {
-
-    if (!options.hasOwnProperty('xrayUrl') || !options.hasOwnProperty('jiraPassword') || !options.hasOwnProperty('jiraUser')) {
+    if (!options.hasOwnProperty('jiraClientId') || !options.hasOwnProperty('xrayAuthUrl')
+        || !options.hasOwnProperty('jiraClientSecret') || !options.hasOwnProperty('xrayImportUrl')) {
         throw new Error('required options are missing');
     }
 
@@ -51,7 +52,7 @@ const XrayReporter = (options, onPrepareDefer, onCompleteDefer, browser) => {
 
     const XrayService = require('./xray-service')(options);
 
-    let result = {
+    const result = {
         info: {
             description: options.description,
             version: options.version
@@ -61,15 +62,15 @@ const XrayReporter = (options, onPrepareDefer, onCompleteDefer, browser) => {
 
     browser.getProcessedConfig().then((config) => {
         result.info.summary = config.capabilities.name || 'no name';
-        if(onPrepareDefer.resolve){
+        if (onPrepareDefer.resolve) {
             onPrepareDefer.resolve();
         } else {
             onPrepareDefer.fulfill();
         }
     });
 
-    let specPromises = [];
-    let specPromisesResolve = {};
+    const specPromises = [];
+    const specPromisesResolve = {};
 
     this.suiteStarted = (suite) => {
         result.tests.push({
@@ -126,7 +127,7 @@ const XrayReporter = (options, onPrepareDefer, onCompleteDefer, browser) => {
             }
 
             if ((specResult.status === 'FAIL' && options.screenshot !== 'never') || options.screenshot === 'always') {
-                let specDonePromises = [];
+                const specDonePromises = [];
 
                 specDonePromises.push(new Promise((resolve) => {
                     browser.takeScreenshot().then((png) => {
@@ -145,23 +146,23 @@ const XrayReporter = (options, onPrepareDefer, onCompleteDefer, browser) => {
                         fs.readFile(buildImageName(specId), (error, png) => {
                             if (error) {
                                 throw new Error(error);
-                            } else {
-                                specResult.evidences.push({
-                                    data: new Buffer(png).toString('base64'),
-                                    filename: 'diff.png',
-                                    contentType: 'image/png'
-                                });
-                                resolve();
                             }
+
+                            specResult.evidences.push({
+                                data: new Buffer(png).toString('base64'),
+                                filename: 'diff.png',
+                                contentType: 'image/png'
+                            });
+                            resolve();
                         });
                     }));
                 }
 
-                Promise.all(specDonePromises).then(() => {
-                    result.tests[index].steps.push(specResult);
-                    specPromisesResolve[spec.id]();
-                });
-
+                Promise.all(specDonePromises)
+                    .then(() => {
+                        result.tests[index].steps.push(specResult);
+                        specPromisesResolve[spec.id]();
+                    });
             } else {
                 result.tests[index].steps.push(specResult);
                 specPromisesResolve[spec.id]();
@@ -185,18 +186,22 @@ const XrayReporter = (options, onPrepareDefer, onCompleteDefer, browser) => {
                 return !!test.status;
             });
             for (let test of result.tests) {
-                test.steps.sort((a, b) => {
-                    return parseInt(a.id.replace('spec', '')) - parseInt(b.id.replace('spec', ''));
-                }).forEach((step) => {
-                    delete step.id;
-                });
+                test.steps
+                    .sort((a, b) => {
+                        return parseInt(a.id.replace('spec', '')) - parseInt(b.id.replace('spec', ''));
+                    })
+                    .forEach((step) => {
+                        delete step.id;
+                    });
             }
-            XrayService.createExecution(result, () => {
-                if(onCompleteDefer.resolve){
-                    onCompleteDefer.resolve();
-                } else {
-                    onCompleteDefer.fulfill();
-                }
+            XrayService.authenticate((token) => {
+                XrayService.createExecution({ result, token }, () => {
+                    if (onCompleteDefer.resolve) {
+                        onCompleteDefer.resolve();
+                    } else {
+                        onCompleteDefer.fulfill();
+                    }
+                });
             });
         });
     };

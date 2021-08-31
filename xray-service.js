@@ -1,25 +1,53 @@
 const popsicle = require('popsicle');
-const auth = require('popsicle-basic-auth');
 
 const XrayService = (options) => {
 
-    this.createExecution = (body, callback) => {
+    this.authenticate = (callback) => {
+        const { xrayAuthUrl, jiraClientId, jiraClientSecret } = options;
+        const body = {
+            client_id: jiraClientId,
+            client_secret: jiraClientSecret
+        };
+
         popsicle.request({
             method: 'POST',
-            url: options.xrayUrl,
+            url: xrayAuthUrl,
             body,
             headers: {
                 'Content-Type': 'application/json'
             }
         })
-            .use(auth(options.jiraUser, options.jiraPassword))
+            .then((response) => {
+                if (response.status !== 200) {
+                    throw new Error(response.body);
+                }
+
+                console.info('X-Ray client successfully authenticated.');
+                callback(response.body);
+            })
+            .catch((error) => {
+                throw new Error(error);
+            });
+    };
+
+    this.createExecution = (execution, callback) => {
+        const { result: body, token } = execution;
+        popsicle.request({
+            method: 'POST',
+            url: options.xrayImportUrl,
+            body,
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${ token }`
+            }
+        })
             .then((res) => {
                 if (res.status !== 200) {
                     throw new Error(res.body);
-                } else {
-                    console.log('Pushed test execution to X-Ray');
-                    callback();
                 }
+
+                console.info('Pushed test execution to X-Ray');
+                callback();
             })
             .catch((error) => {
                 throw new Error(error);
