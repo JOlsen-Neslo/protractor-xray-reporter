@@ -29,7 +29,8 @@ const getDate = () => {
 // TODO: refactor this logic, can be heavily simplified
 const XrayReporter = (options, onPrepareDefer, onCompleteDefer, browser) => {
     if (!options.hasOwnProperty('jiraClientId') || !options.hasOwnProperty('xrayAuthUrl')
-        || !options.hasOwnProperty('jiraClientSecret') || !options.hasOwnProperty('xrayImportUrl')) {
+        || !options.hasOwnProperty('jiraClientSecret') || !options.hasOwnProperty('xrayImportUrl')
+        || !options.hasOwnProperty('jiraProjectKey')) {
         throw new Error('required options are missing');
     }
 
@@ -52,10 +53,12 @@ const XrayReporter = (options, onPrepareDefer, onCompleteDefer, browser) => {
 
     const XrayService = require('./xray-service')(options);
 
+    const { description, version, jiraProjectKey: project } = options;
     const result = {
         info: {
-            description: options.description,
-            version: options.version
+            description,
+            version,
+            project
         },
         tests: []
     };
@@ -106,32 +109,32 @@ const XrayReporter = (options, onPrepareDefer, onCompleteDefer, browser) => {
             let specResult;
 
             if (spec.status !== 'passed') {
-                result.tests[index].status = 'FAIL';
+                result.tests[index].status = 'FAILED';
                 let comment = '';
                 for (let expectation of spec.failedExpectations) {
                     comment += expectation.message;
                 }
                 specResult = {
-                    status: 'FAIL',
+                    status: 'FAILED',
                     comment,
-                    evidences: [],
+                    evidence: [],
                     id: spec.id
                 };
             } else {
-                result.tests[index].status !== 'FAIL' ? result.tests[index].status = 'PASS' : 'FAIL';
+                result.tests[index].status !== 'FAILED' ? result.tests[index].status = 'PASSED' : 'FAILED';
                 specResult = {
-                    status: 'PASS',
-                    evidences: [],
+                    status: 'PASSED',
+                    evidence: [],
                     id: spec.id
                 };
             }
 
-            if ((specResult.status === 'FAIL' && options.screenshot !== 'never') || options.screenshot === 'always') {
+            if ((specResult.status === 'FAILED' && options.screenshot !== 'never') || options.screenshot === 'always') {
                 const specDonePromises = [];
 
                 specDonePromises.push(new Promise((resolve) => {
                     browser.takeScreenshot().then((png) => {
-                        specResult.evidences.push({
+                        specResult.evidence.push({
                             data: png,
                             filename: 'screenshot.png',
                             contentType: 'image/png'
@@ -148,7 +151,7 @@ const XrayReporter = (options, onPrepareDefer, onCompleteDefer, browser) => {
                                 throw new Error(error);
                             }
 
-                            specResult.evidences.push({
+                            specResult.evidence.push({
                                 data: new Buffer(png).toString('base64'),
                                 filename: 'diff.png',
                                 contentType: 'image/png'

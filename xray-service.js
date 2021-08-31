@@ -19,11 +19,11 @@ const XrayService = (options) => {
         })
             .then((response) => {
                 if (response.status !== 200) {
-                    throw new Error(response.body);
+                    throw new Error(`Authentication Error: ${response.body}`);
                 }
 
                 console.info('X-Ray client successfully authenticated.');
-                callback(response.body);
+                callback(JSON.parse(response.body));
             })
             .catch((error) => {
                 throw new Error(error);
@@ -43,7 +43,7 @@ const XrayService = (options) => {
         })
             .then((res) => {
                 if (res.status !== 200) {
-                    throw new Error(res.body);
+                    throw new Error(`Import Error: ${res.body}`);
                 }
 
                 console.info('Pushed test execution to X-Ray');

@@ -50,7 +50,8 @@ exports.config = {
 
         const options = {
             'screenshot': 'fail',
-            'version': '2.0',
+            'version': '1.0',
+            'jiraProjectKey': 'DEMO',
             'jiraClientId': 'XXX',
             'jiraClientSecret': 'XXX',
             'xrayAuthUrl': 'https://{jira-server}.atlassian.net/api/v2/authenticate',
@@ -80,25 +81,24 @@ protractor-xray-v2-reporter can attach screenshots to test executions. Default i
 - `fail`   only attach screenshots if the test failed
 - `always` always attach screenshots
 
-protractor-xray-reporter can work with
+protractor-xray-v2-reporter can work with
 [wswebcreation/protractor-image-comparison](https://github.com/wswebcreation/protractor-image-comparison). If you have
 protractor-image-comparison configured, the comparison images will also be uploaded.
 
-* `version`
+* `version` (optional) - the JIRA version that you are testing.
 
 You can attach a version to the execution. The version has to exist before it is used, currently this reporter does not
 create versions.
 
+* `jiraProjectKey` (required) - The unique project key associated to the project containing your test cases.
 * `jiraClientId` (required) - Client ID provided when creating an X-Ray API Token.
 * `jiraClientSecret` (required) - Client Secret provided when creating an X-Ray API Token.
 * `xrayAuthUrl` (required) - URL to authenticate your Client ID and Client Secret with JIRA + X-Ray
 * `xrayImportUrl` (required) - URL to import your test executions
 
-This is your Xray api url
-
 # Test Setup
 
-A test set is represented by a `describe` block. The test set ID has to be added at the end of the description with an @
+A test case is represented by a `describe` block. The test set ID has to be added at the end of the description with an @
 symbol.
 
 A test step is represented by an `it` block.
